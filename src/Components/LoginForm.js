@@ -4,18 +4,40 @@ import { Icon, Input, Button, Divider } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
 import { validaremail } from "../Utils/Utils";
 import { isEmpty } from "lodash";
+import * as firebase from "firebase";
 
 export default function LoginForm(props) {
   const { toastRef } = props;
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
   const [show, setshow] = useState(true);
+  const [loading, setloading] = useState(false);
+  const navigation = useNavigation();
+
+
 
   const initsesion = () => {
     if (isEmpty(email) || isEmpty(password)) {
       toastRef.current.show("Debe ingresar los valores de email y password");
     } else if (!validaremail(email)) {
       toastRef.current.show("Ingrese un correo válido");
+    } else {
+      setloading(true);
+
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(email, password)
+        .then((response) => {
+          setloading(false);
+          toastRef.current.show("Ha iniciado sesión exitosamente");
+          console.log(firebase.auth().currentUser);
+        })
+        .catch((err) => {
+          setloading(false);
+          toastRef.current.show(
+            "Ha ocurrido un error al intentar iniciar sesión"
+          );
+        });
     }
   };
 
